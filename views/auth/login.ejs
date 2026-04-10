@@ -1,0 +1,46 @@
+<%- include('../partials/header') %>
+
+<main class="page-auth">
+  <div class="auth-card">
+    <div class="auth-card__brand">
+      <span class="nav__brand-icon">✦</span>
+      <span>BlogByte</span>
+    </div>
+    <h1 class="auth-card__title">Welcome back</h1>
+    <p class="auth-card__sub">Sign in to continue writing and reading.</p>
+
+    <form action="/auth/login" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required autocomplete="current-password" />
+          <button type="button" class="input-wrap__toggle" onclick="togglePwd(this)">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full">Sign In</button>
+    </form>
+
+    <p class="auth-card__footer">
+      Don't have an account? <a href="/auth/register">Create one →</a>
+    </p>
+  </div>
+</main>
+
+<script>
+function togglePwd(btn) {
+  const input = btn.previousElementSibling;
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.querySelector('i').className = isHidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+}
+</script>
+
+<%- include('../partials/footer') %>

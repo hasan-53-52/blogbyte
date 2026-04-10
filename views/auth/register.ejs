@@ -1,0 +1,95 @@
+<%- include('../partials/header') %>
+
+<main class="page-auth">
+  <div class="auth-card">
+    <div class="auth-card__brand">
+      <span class="nav__brand-icon">✦</span>
+      <span>BlogByte</span>
+    </div>
+    <h1 class="auth-card__title">Create an account</h1>
+    <p class="auth-card__sub">Join BlogByte and start sharing your ideas.</p>
+
+    <form action="/auth/register" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="name" class="form-label">Full Name</label>
+        <input type="text" id="name" name="name" class="form-input" placeholder="Jane Doe" required minlength="2" maxlength="50" autocomplete="name" />
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" name="password" class="form-input" placeholder="Min 8 characters" required minlength="8" autocomplete="new-password" />
+          <button type="button" class="input-wrap__toggle" onclick="togglePwd('password', this)">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+        <div class="password-strength" id="pwStrength">
+          <div class="password-strength__bar" id="pwBar"></div>
+        </div>
+        <p class="form-hint" id="pwHint">Use uppercase, lowercase and a number.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <div class="input-wrap">
+          <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="••••••••" required autocomplete="new-password" />
+          <button type="button" class="input-wrap__toggle" onclick="togglePwd('confirmPassword', this)">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Secret (hidden unless you know) -->
+      <details class="seo-section" style="margin-bottom: 1rem;">
+        <summary class="seo-section__toggle" style="font-size: 0.85rem; color: var(--text-muted);">Admin registration?</summary>
+        <div class="seo-section__body">
+          <div class="form-group">
+            <label for="adminSecret" class="form-label">Admin Secret</label>
+            <input type="password" id="adminSecret" name="adminSecret" class="form-input" placeholder="Leave blank for regular account" />
+          </div>
+        </div>
+      </details>
+
+      <button type="submit" class="btn btn--primary btn--full">Create Account</button>
+    </form>
+
+    <p class="auth-card__footer">
+      Already have an account? <a href="/auth/login">Sign in →</a>
+    </p>
+  </div>
+</main>
+
+<script>
+function togglePwd(id, btn) {
+  const input = document.getElementById(id);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.querySelector('i').className = isHidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+}
+
+// Password strength
+document.getElementById('password').addEventListener('input', function() {
+  const pw = this.value;
+  const bar = document.getElementById('pwBar');
+  const hint = document.getElementById('pwHint');
+  let strength = 0;
+  if (pw.length >= 8) strength++;
+  if (/[A-Z]/.test(pw)) strength++;
+  if (/[a-z]/.test(pw)) strength++;
+  if (/\d/.test(pw)) strength++;
+  if (/[^A-Za-z0-9]/.test(pw)) strength++;
+
+  bar.style.width = (strength / 5 * 100) + '%';
+  const colors = ['', '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'];
+  const labels = ['', 'Very weak', 'Weak', 'Fair', 'Strong', 'Very strong'];
+  bar.style.background = colors[strength] || '';
+  hint.textContent = strength > 0 ? labels[strength] : 'Use uppercase, lowercase and a number.';
+});
+</script>
+
+<%- include('../partials/footer') %>

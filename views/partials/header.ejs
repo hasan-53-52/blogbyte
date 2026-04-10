@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title : 'BlogByte' %></title>
+
+  <!-- SEO Meta -->
+  <meta name="description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'BlogByte — A modern blog platform for thoughts worth reading.' %>" />
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'BlogByte' %>" />
+  <meta property="og:description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'BlogByte — A modern blog platform for thoughts worth reading.' %>" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="<%= appUrl %><%= currentPath %>" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+<!-- Flash Messages -->
+<% if (flash.success || flash.error || flash.info) { %>
+<div class="flash-container" id="flashContainer">
+  <% if (flash.success) { %>
+    <div class="flash flash--success">
+      <i class="fa-solid fa-circle-check"></i>
+      <span><%= flash.success %></span>
+      <button class="flash__close" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  <% } %>
+  <% if (flash.error) { %>
+    <div class="flash flash--error">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span><%= flash.error %></span>
+      <button class="flash__close" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  <% } %>
+  <% if (flash.info) { %>
+    <div class="flash flash--info">
+      <i class="fa-solid fa-circle-info"></i>
+      <span><%= flash.info %></span>
+      <button class="flash__close" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  <% } %>
+</div>
+<% } %>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav__inner">
+    <a href="/" class="nav__brand">
+      <span class="nav__brand-icon">✦</span>
+      <span class="nav__brand-name">BlogByte</span>
+    </a>
+
+    <div class="nav__links">
+      <a href="/" class="nav__link <%= currentPath === '/' ? 'nav__link--active' : '' %>">Home</a>
+      <a href="/?category=Technology" class="nav__link">Tech</a>
+      <a href="/?category=Design" class="nav__link">Design</a>
+      <a href="/?category=Programming" class="nav__link">Code</a>
+    </div>
+
+    <div class="nav__actions">
+      <% if (currentUser) { %>
+        <div class="nav__user-menu">
+          <button class="nav__user-btn" id="userMenuBtn">
+            <span class="nav__avatar"><%= currentUser.name.charAt(0).toUpperCase() %></span>
+            <span class="nav__user-name"><%= currentUser.name.split(' ')[0] %></span>
+            <i class="fa-solid fa-chevron-down nav__chevron"></i>
+          </button>
+          <div class="nav__dropdown" id="userDropdown">
+            <a href="/posts/new" class="nav__dropdown-item">
+              <i class="fa-solid fa-pen-nib"></i> Write Post
+            </a>
+            <a href="/auth/profile" class="nav__dropdown-item">
+              <i class="fa-solid fa-user"></i> Profile
+            </a>
+            <% if (isAdmin) { %>
+              <a href="/admin" class="nav__dropdown-item nav__dropdown-item--admin">
+                <i class="fa-solid fa-shield-halved"></i> Admin
+              </a>
+            <% } %>
+            <div class="nav__dropdown-divider"></div>
+            <form action="/auth/logout" method="POST" style="margin:0">
+              <button type="submit" class="nav__dropdown-item nav__dropdown-item--danger">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+              </button>
+            </form>
+          </div>
+        </div>
+      <% } else { %>
+        <a href="/auth/login" class="btn btn--ghost btn--sm">Sign In</a>
+        <a href="/auth/register" class="btn btn--primary btn--sm">Get Started</a>
+      <% } %>
+
+      <button class="nav__mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="nav__mobile" id="mobileMenu">
+    <a href="/" class="nav__mobile-link">Home</a>
+    <a href="/?category=Technology" class="nav__mobile-link">Technology</a>
+    <a href="/?category=Design" class="nav__mobile-link">Design</a>
+    <a href="/?category=Programming" class="nav__mobile-link">Programming</a>
+    <% if (currentUser) { %>
+      <a href="/posts/new" class="nav__mobile-link">Write Post</a>
+      <a href="/auth/profile" class="nav__mobile-link">Profile</a>
+      <% if (isAdmin) { %><a href="/admin" class="nav__mobile-link">Admin Panel</a><% } %>
+    <% } else { %>
+      <a href="/auth/login" class="nav__mobile-link">Sign In</a>
+      <a href="/auth/register" class="nav__mobile-link">Create Account</a>
+    <% } %>
+  </div>
+</nav>

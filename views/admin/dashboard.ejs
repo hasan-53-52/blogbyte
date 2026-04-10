@@ -1,0 +1,128 @@
+<%- include('../partials/header') %>
+
+<main class="page-admin">
+  <div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__header">
+        <span>⚡</span> Admin Panel
+      </div>
+      <nav class="admin-nav">
+        <a href="/admin" class="admin-nav__link <%= currentPath === '/admin' ? 'admin-nav__link--active' : '' %>">
+          <i class="fa-solid fa-gauge"></i> Dashboard
+        </a>
+        <a href="/admin/posts" class="admin-nav__link <%= currentPath.startsWith('/admin/posts') ? 'admin-nav__link--active' : '' %>">
+          <i class="fa-solid fa-newspaper"></i> Posts
+        </a>
+        <a href="/admin/users" class="admin-nav__link <%= currentPath.startsWith('/admin/users') ? 'admin-nav__link--active' : '' %>">
+          <i class="fa-solid fa-users"></i> Users
+        </a>
+        <a href="/admin/comments" class="admin-nav__link <%= currentPath.startsWith('/admin/comments') ? 'admin-nav__link--active' : '' %>">
+          <i class="fa-solid fa-comments"></i> Comments
+        </a>
+        <div class="admin-nav__divider"></div>
+        <a href="/" class="admin-nav__link"><i class="fa-solid fa-arrow-left"></i> Back to Site</a>
+        <a href="/posts/new" class="admin-nav__link"><i class="fa-solid fa-pen-nib"></i> New Post</a>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <div class="admin-content">
+      <div class="admin-topbar">
+        <h1>Dashboard</h1>
+        <span class="admin-topbar__user">Signed in as <strong><%= currentUser.name %></strong></span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue"><i class="fa-solid fa-newspaper"></i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value"><%= stats.totalPosts %></div>
+            <div class="stat-card__label">Total Posts</div>
+            <div class="stat-card__sub"><%= stats.publishedPosts %> published · <%= stats.draftPosts %> drafts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value"><%= stats.totalUsers %></div>
+            <div class="stat-card__label">Registered Users</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--amber"><i class="fa-solid fa-comments"></i></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value"><%= stats.totalComments %></div>
+            <div class="stat-card__label">Comments</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="admin-grid">
+        <div class="admin-panel">
+          <div class="admin-panel__header">
+            <h2>Recent Posts</h2>
+            <a href="/admin/posts" class="btn btn--ghost btn--xs">View All</a>
+          </div>
+          <table class="admin-table">
+            <thead><tr><th>Title</th><th>Status</th><th>Views</th><th>Date</th></tr></thead>
+            <tbody>
+              <% recentPosts.forEach(post => { %>
+              <tr>
+                <td><a href="/posts/<%= post.slug %>"><%= post.title.substring(0,45) %><%= post.title.length > 45 ? '…' : '' %></a></td>
+                <td><span class="badge badge--<%= post.status %>"><%= post.status %></span></td>
+                <td><%= post.views %></td>
+                <td><%= new Date(post.createdAt).toLocaleDateString() %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="admin-panel">
+          <div class="admin-panel__header">
+            <h2>Top Posts</h2>
+          </div>
+          <table class="admin-table">
+            <thead><tr><th>Title</th><th>Views</th></tr></thead>
+            <tbody>
+              <% topPosts.forEach((post, i) => { %>
+              <tr>
+                <td><span class="admin-rank">#<%= i+1 %></span> <a href="/posts/<%= post.slug %>"><%= post.title.substring(0,40) %><%= post.title.length > 40 ? '…' : '' %></a></td>
+                <td><%= post.views %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Users -->
+      <div class="admin-panel">
+        <div class="admin-panel__header">
+          <h2>New Users</h2>
+          <a href="/admin/users" class="btn btn--ghost btn--xs">View All</a>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+          <tbody>
+            <% recentUsers.forEach(user => { %>
+            <tr>
+              <td><%= user.name %></td>
+              <td><%= user.email %></td>
+              <td><span class="badge badge--<%= user.role %>"><%= user.role %></span></td>
+              <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

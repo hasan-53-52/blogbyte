@@ -1,0 +1,191 @@
+<%- include('../partials/header') %>
+
+<main class="page-form">
+  <div class="container container--narrow">
+
+    <div class="form-page-header">
+      <h1><%= post ? 'Edit Post' : 'Write a New Post' %></h1>
+      <p><%= post ? 'Update your post below.' : 'Share your ideas with the world.' %></p>
+    </div>
+
+    <form action="<%= action %>" method="<%= method %>" class="post-form" id="postForm">
+
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title" class="form-label">Title <span class="required">*</span></label>
+        <input type="text" id="title" name="title" class="form-input form-input--lg"
+               placeholder="A great title…" required maxlength="150"
+               value="<%= post ? post.title : '' %>" />
+        <div class="char-counter"><span id="titleCount"><%= post ? post.title.length : 0 %></span>/150</div>
+      </div>
+
+      <!-- Excerpt -->
+      <div class="form-group">
+        <label for="excerpt" class="form-label">Excerpt <span class="form-hint">(auto-generated if empty)</span></label>
+        <textarea id="excerpt" name="excerpt" class="form-textarea" rows="2"
+                  placeholder="A short summary shown on the listing page…" maxlength="300"><%= post ? post.excerpt : '' %></textarea>
+        <div class="char-counter"><span id="excerptCount"><%= post ? (post.excerpt || '').length : 0 %></span>/300</div>
+      </div>
+
+      <!-- Content -->
+      <div class="form-group">
+        <label class="form-label">Content <span class="required">*</span></label>
+        <div class="editor-toolbar" id="editorToolbar">
+          <button type="button" data-cmd="bold" title="Bold"><i class="fa-solid fa-bold"></i></button>
+          <button type="button" data-cmd="italic" title="Italic"><i class="fa-solid fa-italic"></i></button>
+          <button type="button" data-cmd="underline" title="Underline"><i class="fa-solid fa-underline"></i></button>
+          <div class="editor-toolbar__sep"></div>
+          <button type="button" data-cmd="h2" title="Heading 2"><b>H2</b></button>
+          <button type="button" data-cmd="h3" title="Heading 3"><b>H3</b></button>
+          <div class="editor-toolbar__sep"></div>
+          <button type="button" data-cmd="insertUnorderedList" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+          <button type="button" data-cmd="insertOrderedList" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+          <div class="editor-toolbar__sep"></div>
+          <button type="button" data-cmd="createLink" title="Add Link"><i class="fa-solid fa-link"></i></button>
+          <button type="button" data-cmd="formatBlock-blockquote" title="Blockquote"><i class="fa-solid fa-quote-left"></i></button>
+          <button type="button" data-cmd="formatBlock-pre" title="Code Block"><i class="fa-solid fa-code"></i></button>
+        </div>
+        <div id="editor" class="form-editor" contenteditable="true" data-placeholder="Start writing your post…"><%- post ? post.content : '' %></div>
+        <input type="hidden" name="content" id="contentInput" />
+      </div>
+
+      <!-- Category & Status -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category" class="form-label">Category <span class="required">*</span></label>
+          <select id="category" name="category" class="form-select" required>
+            <option value="">Select a category…</option>
+            <% ['Technology','Programming','Design','Science','Business','Lifestyle','Health','Travel','Food','Other'].forEach(cat => { %>
+              <option value="<%= cat %>" <%= post && post.category === cat ? 'selected' : '' %>><%= cat %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status" class="form-label">Status</label>
+          <select id="status" name="status" class="form-select">
+            <option value="draft" <%= !post || post.status === 'draft' ? 'selected' : '' %>>Draft</option>
+            <option value="published" <%= post && post.status === 'published' ? 'selected' : '' %>>Published</option>
+            <% if (isAdmin) { %>
+            <option value="archived" <%= post && post.status === 'archived' ? 'selected' : '' %>>Archived</option>
+            <% } %>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="form-group">
+        <label for="tags" class="form-label">Tags <span class="form-hint">(comma-separated, max 10)</span></label>
+        <input type="text" id="tagsInput" class="form-input" placeholder="javascript, webdev, tutorial…"
+               value="<%= post && post.tags ? post.tags.join(', ') : '' %>" />
+        <input type="hidden" name="tags" id="tagsHidden" value="<%= post && post.tags ? post.tags.join(',') : '' %>" />
+        <div class="tags-preview" id="tagsPreview"></div>
+      </div>
+
+      <!-- Cover Image URL -->
+      <div class="form-group">
+        <label for="coverImage" class="form-label">Cover Image URL <span class="form-hint">(optional)</span></label>
+        <input type="url" id="coverImage" name="coverImage" class="form-input"
+               placeholder="https://example.com/image.jpg"
+               value="<%= post ? post.coverImage || '' : '' %>" />
+      </div>
+
+      <!-- SEO -->
+      <details class="seo-section">
+        <summary class="seo-section__toggle">
+          <i class="fa-solid fa-magnifying-glass-chart"></i> SEO Settings
+        </summary>
+        <div class="seo-section__body">
+          <div class="form-group">
+            <label for="metaTitle" class="form-label">Meta Title <span class="form-hint">(max 70 chars)</span></label>
+            <input type="text" id="metaTitle" name="metaTitle" class="form-input"
+                   placeholder="Custom page title for search engines…" maxlength="70"
+                   value="<%= post ? post.metaTitle || '' : '' %>" />
+          </div>
+          <div class="form-group">
+            <label for="metaDescription" class="form-label">Meta Description <span class="form-hint">(max 160 chars)</span></label>
+            <textarea id="metaDescription" name="metaDescription" class="form-textarea" rows="2"
+                      placeholder="Brief description for search engine results…" maxlength="160"><%= post ? post.metaDescription || '' : '' %></textarea>
+          </div>
+        </div>
+      </details>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <a href="<%= post ? '/posts/' + post.slug : '/' %>" class="btn btn--ghost">Cancel</a>
+        <button type="submit" name="status" value="draft" class="btn btn--ghost" id="saveDraft">
+          <i class="fa-regular fa-floppy-disk"></i> Save Draft
+        </button>
+        <button type="submit" class="btn btn--primary" id="publishBtn">
+          <%= post && post.status === 'published' ? 'Update Post' : 'Publish Post' %>
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</main>
+
+<script>
+  // ── Rich Text Editor ──────────────────────────────────────────
+  const editor = document.getElementById('editor');
+  const contentInput = document.getElementById('contentInput');
+
+  document.querySelectorAll('#editorToolbar button').forEach(btn => {
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const cmd = btn.dataset.cmd;
+      if (cmd === 'createLink') {
+        const url = prompt('Enter URL:');
+        if (url) document.execCommand('createLink', false, url);
+      } else if (cmd.startsWith('formatBlock-')) {
+        document.execCommand('formatBlock', false, cmd.split('-')[1]);
+      } else if (cmd === 'h2' || cmd === 'h3') {
+        document.execCommand('formatBlock', false, cmd);
+      } else {
+        document.execCommand(cmd, false, null);
+      }
+      editor.focus();
+    });
+  });
+
+  // Placeholder
+  editor.addEventListener('focus', () => { if (!editor.textContent.trim()) editor.innerHTML = ''; });
+  editor.addEventListener('blur', () => {
+    if (!editor.textContent.trim()) editor.setAttribute('data-empty', 'true');
+    else editor.removeAttribute('data-empty');
+  });
+  if (!editor.textContent.trim()) editor.setAttribute('data-empty', 'true');
+
+  // ── Char Counters ─────────────────────────────────────────────
+  document.getElementById('title').addEventListener('input', function() {
+    document.getElementById('titleCount').textContent = this.value.length;
+  });
+  document.getElementById('excerpt').addEventListener('input', function() {
+    document.getElementById('excerptCount').textContent = this.value.length;
+  });
+
+  // ── Tags ──────────────────────────────────────────────────────
+  const tagsInput = document.getElementById('tagsInput');
+  const tagsHidden = document.getElementById('tagsHidden');
+  const tagsPreview = document.getElementById('tagsPreview');
+
+  function renderTags() {
+    const tags = tagsInput.value.split(',').map(t => t.trim().toLowerCase()).filter(t => t);
+    tagsHidden.value = tags.join(',');
+    tagsPreview.innerHTML = tags.map(t => `<span class="tag">#${t}</span>`).join('');
+  }
+  tagsInput.addEventListener('input', renderTags);
+  renderTags();
+
+  // ── Form Submit ───────────────────────────────────────────────
+  document.getElementById('postForm').addEventListener('submit', function(e) {
+    contentInput.value = editor.innerHTML;
+    if (!contentInput.value || contentInput.value === '<br>' || editor.getAttribute('data-empty')) {
+      e.preventDefault();
+      alert('Please write some content for your post.');
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

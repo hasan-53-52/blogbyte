@@ -1,0 +1,22 @@
+<%- include('./partials/header') %>
+
+<main class="page-error">
+  <div class="error-card">
+    <div class="error-card__code"><%= code %></div>
+    <div class="error-card__icon">✦</div>
+    <h1 class="error-card__title">
+      <%= code === 404 ? 'Page Not Found' : code === 403 ? 'Access Denied' : 'Something Went Wrong' %>
+    </h1>
+    <p class="error-card__message"><%= message %></p>
+    <div class="error-card__actions">
+      <a href="/" class="btn btn--primary">← Back to Home</a>
+      <% if (currentUser) { %>
+        <a href="/auth/profile" class="btn btn--ghost">My Profile</a>
+      <% } else { %>
+        <a href="/auth/login" class="btn btn--ghost">Sign In</a>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<%- include('./partials/footer') %>

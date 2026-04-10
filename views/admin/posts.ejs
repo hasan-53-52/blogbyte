@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+<main class="page-admin">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__header"><span>⚡</span> Admin Panel</div>
+      <nav class="admin-nav">
+        <a href="/admin" class="admin-nav__link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+        <a href="/admin/posts" class="admin-nav__link admin-nav__link--active"><i class="fa-solid fa-newspaper"></i> Posts</a>
+        <a href="/admin/users" class="admin-nav__link"><i class="fa-solid fa-users"></i> Users</a>
+        <a href="/admin/comments" class="admin-nav__link"><i class="fa-solid fa-comments"></i> Comments</a>
+        <div class="admin-nav__divider"></div>
+        <a href="/" class="admin-nav__link"><i class="fa-solid fa-arrow-left"></i> Back to Site</a>
+        <a href="/posts/new" class="admin-nav__link"><i class="fa-solid fa-pen-nib"></i> New Post</a>
+      </nav>
+    </aside>
+
+    <div class="admin-content">
+      <div class="admin-topbar">
+        <h1>Manage Posts</h1>
+        <a href="/posts/new" class="btn btn--primary btn--sm"><i class="fa-solid fa-plus"></i> New Post</a>
+      </div>
+
+      <!-- Filters -->
+      <form action="/admin/posts" method="GET" class="admin-filters">
+        <input type="text" name="search" class="form-input form-input--sm" placeholder="Search posts…" value="<%= filters.search || '' %>" />
+        <select name="status" class="form-select form-select--sm" onchange="this.form.submit()">
+          <option value="">All statuses</option>
+          <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>>Published</option>
+          <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Draft</option>
+          <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archived</option>
+        </select>
+        <button type="submit" class="btn btn--ghost btn--sm">Filter</button>
+        <% if (filters.status || filters.search) { %>
+          <a href="/admin/posts" class="btn btn--ghost btn--sm">Clear</a>
+        <% } %>
+      </form>
+
+      <div class="admin-panel">
+        <table class="admin-table admin-table--full">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Featured</th>
+              <th>Views</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% posts.forEach(post => { %>
+            <tr>
+              <td>
+                <a href="/posts/<%= post.slug %>" target="_blank" class="admin-table__title">
+                  <%= post.title.substring(0, 50) %><%= post.title.length > 50 ? '…' : '' %>
+                </a>
+              </td>
+              <td><%= post.author.name %></td>
+              <td><%= post.category %></td>
+              <td><span class="badge badge--<%= post.status %>"><%= post.status %></span></td>
+              <td>
+                <button class="toggle-featured" data-id="<%= post._id %>"
+                        style="background:none;border:none;cursor:pointer;font-size:1.2rem"
+                        title="Toggle featured">
+                  <%= post.featured ? '⭐' : '☆' %>
+                </button>
+              </td>
+              <td><%= post.views %></td>
+              <td><%= new Date(post.createdAt).toLocaleDateString() %></td>
+              <td class="admin-table__actions">
+                <a href="/posts/<%= post.slug %>/edit" class="btn btn--ghost btn--xs" title="Edit">
+                  <i class="fa-solid fa-pencil"></i>
+                </a>
+                <form action="/admin/posts/<%= post._id %>?_method=DELETE" method="POST" style="display:inline"
+                      onsubmit="return confirm('Delete this post permanently?')">
+                  <button type="submit" class="btn btn--danger btn--xs" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <% if (posts.length === 0) { %>
+        <div class="empty-state" style="padding: 2rem;">
+          <p>No posts found.</p>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (pagination.totalPages > 1) { %>
+      <nav class="pagination">
+        <% if (pagination.page > 1) { %>
+          <a href="/admin/posts?page=<%= pagination.page - 1 %>" class="pagination__btn">← Prev</a>
+        <% } %>
+        <span class="pagination__info">Page <%= pagination.page %> of <%= pagination.totalPages %> (<%= pagination.total %> posts)</span>
+        <% if (pagination.page < pagination.totalPages) { %>
+          <a href="/admin/posts?page=<%= pagination.page + 1 %>" class="pagination__btn">Next →</a>
+        <% } %>
+      </nav>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<script>
+document.querySelectorAll('.toggle-featured').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    const res = await fetch(`/admin/posts/${id}/featured`, { method: 'PATCH' });
+    const data = await res.json();
+    if (data.success) btn.textContent = data.featured ? '⭐' : '☆';
+  });
+});
+</script>
+
+<%- include('../partials/footer') %>

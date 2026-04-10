@@ -1,0 +1,225 @@
+<%- include('../partials/header') %>
+
+<main class="page-post">
+  <div class="container container--narrow">
+
+    <!-- ── Post Header ───────────────────────────────────────── -->
+    <header class="post-header">
+      <div class="post-header__meta">
+        <a href="/?category=<%= post.category %>" class="tag tag--cat"><%= post.category %></a>
+        <span class="post-header__date">
+          <%= post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '' %>
+        </span>
+      </div>
+
+      <h1 class="post-header__title"><%= post.title %></h1>
+      <p class="post-header__excerpt"><%= post.excerpt %></p>
+
+      <div class="post-header__author-row">
+        <div class="author-card-sm">
+          <span class="avatar"><%= post.author.name.charAt(0) %></span>
+          <div>
+            <div class="author-card-sm__name"><%= post.author.name %></div>
+            <div class="author-card-sm__bio"><%= post.author.bio || 'BlogByte Author' %></div>
+          </div>
+        </div>
+        <div class="post-header__stats">
+          <span><i class="fa-regular fa-clock"></i> <%= post.readTime %> min read</span>
+          <span><i class="fa-regular fa-eye"></i> <%= post.views + 1 %> views</span>
+          <span><i class="fa-regular fa-heart"></i> <span id="likeCount"><%= post.likeCount %></span></span>
+        </div>
+      </div>
+
+      <!-- Author/Admin Actions -->
+      <% if (currentUser && (currentUser._id.toString() === post.author._id.toString() || isAdmin)) { %>
+      <div class="post-header__actions">
+        <a href="/posts/<%= post.slug %>/edit" class="btn btn--ghost btn--sm">
+          <i class="fa-solid fa-pencil"></i> Edit
+        </a>
+        <form action="/posts/<%= post.slug %>?_method=DELETE" method="POST" style="display:inline"
+              onsubmit="return confirm('Delete this post permanently?')">
+          <button type="submit" class="btn btn--danger btn--sm">
+            <i class="fa-solid fa-trash"></i> Delete
+          </button>
+        </form>
+      </div>
+      <% } %>
+    </header>
+
+    <!-- ── Cover Image ────────────────────────────────────────── -->
+    <% if (post.coverImage) { %>
+    <div class="post-cover">
+      <img src="<%= post.coverImage %>" alt="<%= post.title %>" />
+    </div>
+    <% } %>
+
+    <!-- ── Post Content ───────────────────────────────────────── -->
+    <article class="post-content prose">
+      <%- post.content %>
+    </article>
+
+    <!-- ── Tags ──────────────────────────────────────────────── -->
+    <% if (post.tags && post.tags.length > 0) { %>
+    <div class="post-tags">
+      <% post.tags.forEach(tag => { %>
+        <a href="/?tag=<%= tag %>" class="tag">#<%= tag %></a>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <!-- ── Like Button ────────────────────────────────────────── -->
+    <div class="post-engagement">
+      <% if (currentUser) { %>
+      <button class="like-btn <%= userLiked ? 'like-btn--active' : '' %>" id="likeBtn"
+              data-slug="<%= post.slug %>" data-liked="<%= userLiked %>">
+        <i class="fa-<%= userLiked ? 'solid' : 'regular' %> fa-heart"></i>
+        <span id="likeBtnCount"><%= post.likeCount %></span>
+        <span><%= userLiked ? 'Liked' : 'Like' %></span>
+      </button>
+      <% } else { %>
+      <a href="/auth/login" class="like-btn">
+        <i class="fa-regular fa-heart"></i>
+        <span><%= post.likeCount %></span>
+        <span>Like</span>
+      </a>
+      <% } %>
+
+      <button class="share-btn" onclick="navigator.share ? navigator.share({title: '<%= post.title %>', url: window.location.href}) : navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied!'))">
+        <i class="fa-solid fa-share-nodes"></i> Share
+      </button>
+    </div>
+
+    <!-- ── Author Bio ─────────────────────────────────────────── -->
+    <div class="author-bio-card">
+      <span class="avatar avatar--lg"><%= post.author.name.charAt(0) %></span>
+      <div>
+        <h3>Written by <%= post.author.name %></h3>
+        <p><%= post.author.bio || 'A passionate writer and contributor to BlogByte.' %></p>
+      </div>
+    </div>
+
+    <!-- ── Related Posts ──────────────────────────────────────── -->
+    <% if (related.length > 0) { %>
+    <section class="related-posts">
+      <h2 class="section-title">Related Posts</h2>
+      <div class="related-grid">
+        <% related.forEach(r => { %>
+        <a href="/posts/<%= r.slug %>" class="related-card">
+          <span class="tag tag--cat tag--sm"><%= r.category %></span>
+          <h3><%= r.title %></h3>
+          <p><%= r.excerpt ? r.excerpt.substring(0, 100) + '...' : '' %></p>
+          <span class="related-card__read"><%= r.readTime %> min read →</span>
+        </a>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- ── Comments ───────────────────────────────────────────── -->
+    <section class="comments-section">
+      <h2 class="section-title">Comments (<%= comments.length %>)</h2>
+
+      <% if (currentUser) { %>
+      <form class="comment-form" id="commentForm">
+        <textarea name="content" id="commentContent" placeholder="Share your thoughts…" rows="4" required maxlength="1000"></textarea>
+        <div class="comment-form__footer">
+          <span class="comment-form__hint">Be kind, be constructive.</span>
+          <button type="submit" class="btn btn--primary btn--sm">Post Comment</button>
+        </div>
+      </form>
+      <% } else { %>
+      <div class="comment-login-prompt">
+        <a href="/auth/login" class="btn btn--ghost">Sign in to comment</a>
+      </div>
+      <% } %>
+
+      <div class="comments-list" id="commentsList">
+        <% if (comments.length === 0) { %>
+        <div class="empty-comments">
+          <p>No comments yet. Be the first!</p>
+        </div>
+        <% } else { %>
+          <% comments.forEach(comment => { %>
+          <div class="comment">
+            <span class="avatar-sm"><%= comment.author.name.charAt(0) %></span>
+            <div class="comment__body">
+              <div class="comment__header">
+                <strong><%= comment.author.name %></strong>
+                <span class="comment__date">
+                  <%= new Date(comment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                </span>
+              </div>
+              <p class="comment__text"><%= comment.content %></p>
+            </div>
+          </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+  // Like button
+  const likeBtn = document.getElementById('likeBtn');
+  if (likeBtn) {
+    likeBtn.addEventListener('click', async () => {
+      const slug = likeBtn.dataset.slug;
+      const res = await fetch(`/posts/${slug}/like`, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('likeCount').textContent = data.likeCount;
+        document.getElementById('likeBtnCount').textContent = data.likeCount;
+        likeBtn.querySelector('i').className = data.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        likeBtn.querySelector('span:last-child').textContent = data.liked ? 'Liked' : 'Like';
+        likeBtn.classList.toggle('like-btn--active', data.liked);
+      }
+    });
+  }
+
+  // Comment form
+  const commentForm = document.getElementById('commentForm');
+  if (commentForm) {
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('commentContent').value.trim();
+      if (!content) return;
+
+      const slug = '<%= post.slug %>';
+      const res = await fetch(`/posts/${slug}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        const list = document.getElementById('commentsList');
+        const empty = list.querySelector('.empty-comments');
+        if (empty) empty.remove();
+
+        const commentEl = document.createElement('div');
+        commentEl.className = 'comment comment--new';
+        commentEl.innerHTML = `
+          <span class="avatar-sm">${data.comment.author.name.charAt(0)}</span>
+          <div class="comment__body">
+            <div class="comment__header">
+              <strong>${data.comment.author.name}</strong>
+              <span class="comment__date">Just now</span>
+            </div>
+            <p class="comment__text">${data.comment.content}</p>
+          </div>`;
+        list.prepend(commentEl);
+        commentForm.reset();
+
+        // Update count
+        const title = document.querySelector('.section-title');
+        const currentCount = parseInt(title.textContent.match(/\d+/)?.[0] || 0);
+        title.textContent = `Comments (${currentCount + 1})`;
+      }
+    });
+  }
+</script>
+
+<%- include('../partials/footer') %>

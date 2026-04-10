@@ -1,0 +1,165 @@
+<%- include('../partials/header') %>
+
+<main class="page-home">
+
+  <!-- ── Hero ─────────────────────────────────────────────────── -->
+  <% if (!filters.search && !filters.category && !filters.tag && featured.length > 0) { %>
+  <section class="hero">
+    <div class="hero__inner">
+      <div class="hero__eyebrow">Featured</div>
+      <h1 class="hero__title"><%= featured[0].title %></h1>
+      <p class="hero__excerpt"><%= featured[0].excerpt %></p>
+      <div class="hero__meta">
+        <span class="hero__author">
+          <span class="avatar-sm"><%= featured[0].author.name.charAt(0) %></span>
+          <%= featured[0].author.name %>
+        </span>
+        <span class="hero__sep">·</span>
+        <span><%= featured[0].readTime %> min read</span>
+        <span class="hero__sep">·</span>
+        <span class="tag tag--cat"><%= featured[0].category %></span>
+      </div>
+      <a href="/posts/<%= featured[0].slug %>" class="btn btn--primary">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <% if (featured.length > 1) { %>
+    <div class="hero__secondary">
+      <% featured.slice(1).forEach(post => { %>
+      <a href="/posts/<%= post.slug %>" class="hero__secondary-card">
+        <span class="tag tag--cat tag--sm"><%= post.category %></span>
+        <h3><%= post.title %></h3>
+        <div class="hero__secondary-meta">
+          <span><%= post.author.name %></span>
+          <span><%= post.readTime %> min</span>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+    <% } %>
+  </section>
+  <% } %>
+
+  <!-- ── Search & Filters ──────────────────────────────────────── -->
+  <section class="filters">
+    <div class="container">
+      <form action="/" method="GET" class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" name="search" placeholder="Search posts…" value="<%= filters.search || '' %>" />
+        <% if (filters.search) { %>
+          <a href="/" class="search-bar__clear"><i class="fa-solid fa-xmark"></i></a>
+        <% } %>
+        <button type="submit" class="btn btn--primary btn--sm">Search</button>
+      </form>
+
+      <div class="category-pills">
+        <a href="/" class="pill <%= !filters.category ? 'pill--active' : '' %>">All</a>
+        <% categories.forEach(cat => { %>
+          <a href="/?category=<%= cat %>" class="pill <%= filters.category === cat ? 'pill--active' : '' %>">
+            <%= cat %>
+          </a>
+        <% }) %>
+      </div>
+
+      <% if (filters.search || filters.category || filters.tag) { %>
+      <div class="active-filters">
+        <span>Showing results</span>
+        <% if (filters.search) { %><span class="filter-badge">Search: "<%= filters.search %>" <a href="/">×</a></span><% } %>
+        <% if (filters.category) { %><span class="filter-badge">Category: <%= filters.category %> <a href="/">×</a></span><% } %>
+        <% if (filters.tag) { %><span class="filter-badge">Tag: #<%= filters.tag %> <a href="/">×</a></span><% } %>
+        <span class="filter-count"><%= pagination.total %> post<%= pagination.total !== 1 ? 's' : '' %></span>
+      </div>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- ── Post Grid ─────────────────────────────────────────────── -->
+  <section class="post-grid-section">
+    <div class="container">
+      <% if (posts.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-state__icon">✦</div>
+          <h2>No posts found</h2>
+          <p>Try a different search or browse another category.</p>
+          <a href="/" class="btn btn--ghost">Clear Filters</a>
+        </div>
+      <% } else { %>
+        <div class="post-grid">
+          <% posts.forEach((post, i) => { %>
+          <article class="post-card <%= i === 0 && !filters.search ? 'post-card--wide' : '' %>">
+            <% if (post.coverImage) { %>
+              <a href="/posts/<%= post.slug %>" class="post-card__img-wrap">
+                <img src="<%= post.coverImage %>" alt="<%= post.title %>" class="post-card__img" loading="lazy" />
+              </a>
+            <% } else { %>
+              <a href="/posts/<%= post.slug %>" class="post-card__img-wrap post-card__img-wrap--placeholder">
+                <span class="post-card__placeholder-letter"><%= post.title.charAt(0) %></span>
+              </a>
+            <% } %>
+
+            <div class="post-card__body">
+              <div class="post-card__top">
+                <a href="/?category=<%= post.category %>" class="tag tag--cat"><%= post.category %></a>
+                <% if (post.featured) { %><span class="tag tag--featured">Featured</span><% } %>
+              </div>
+              <h2 class="post-card__title">
+                <a href="/posts/<%= post.slug %>"><%= post.title %></a>
+              </h2>
+              <p class="post-card__excerpt"><%= post.excerpt %></p>
+
+              <div class="post-card__footer">
+                <div class="post-card__author">
+                  <span class="avatar-sm"><%= post.author.name.charAt(0) %></span>
+                  <span><%= post.author.name %></span>
+                </div>
+                <div class="post-card__stats">
+                  <span><i class="fa-regular fa-clock"></i> <%= post.readTime %> min</span>
+                  <span><i class="fa-regular fa-eye"></i> <%= post.views %></span>
+                </div>
+              </div>
+
+              <% if (post.tags && post.tags.length > 0) { %>
+              <div class="post-card__tags">
+                <% post.tags.slice(0,3).forEach(tag => { %>
+                  <a href="/?tag=<%= tag %>" class="tag">#<%= tag %></a>
+                <% }) %>
+              </div>
+              <% } %>
+            </div>
+          </article>
+          <% }) %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination.totalPages > 1) { %>
+        <nav class="pagination" aria-label="Page navigation">
+          <% if (pagination.page > 1) { %>
+            <a href="?page=<%= pagination.page - 1 %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.search ? '&search=' + filters.search : '' %>" class="pagination__btn">
+              <i class="fa-solid fa-arrow-left"></i> Previous
+            </a>
+          <% } %>
+
+          <div class="pagination__pages">
+            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+              <% if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) { %>
+                <a href="?page=<%= i %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.search ? '&search=' + filters.search : '' %>"
+                   class="pagination__page <%= i === pagination.page ? 'pagination__page--active' : '' %>"><%= i %></a>
+              <% } else if (i === pagination.page - 3 || i === pagination.page + 3) { %>
+                <span class="pagination__ellipsis">…</span>
+              <% } %>
+            <% } %>
+          </div>
+
+          <% if (pagination.page < pagination.totalPages) { %>
+            <a href="?page=<%= pagination.page + 1 %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.search ? '&search=' + filters.search : '' %>" class="pagination__btn">
+              Next <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          <% } %>
+        </nav>
+        <% } %>
+      <% } %>
+    </div>
+  </section>
+
+</main>
+
+<%- include('../partials/footer') %>

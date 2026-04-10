@@ -1,0 +1,51 @@
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <a href="/" class="footer__logo">
+        <span class="nav__brand-icon">✦</span> BlogByte
+      </a>
+      <p class="footer__tagline">Thoughts worth reading. Ideas worth sharing.</p>
+      <div class="footer__social">
+        <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="#" aria-label="RSS"><i class="fa-solid fa-rss"></i></a>
+      </div>
+    </div>
+
+    <div class="footer__links">
+      <div class="footer__col">
+        <h4>Explore</h4>
+        <a href="/?category=Technology">Technology</a>
+        <a href="/?category=Programming">Programming</a>
+        <a href="/?category=Design">Design</a>
+        <a href="/?category=Science">Science</a>
+        <a href="/?category=Business">Business</a>
+      </div>
+      <div class="footer__col">
+        <h4>Account</h4>
+        <% if (currentUser) { %>
+          <a href="/auth/profile">My Profile</a>
+          <a href="/posts/new">Write a Post</a>
+          <% if (isAdmin) { %><a href="/admin">Admin Panel</a><% } %>
+        <% } else { %>
+          <a href="/auth/login">Sign In</a>
+          <a href="/auth/register">Create Account</a>
+        <% } %>
+      </div>
+      <div class="footer__col">
+        <h4>API</h4>
+        <a href="/api/v1/posts">Posts API</a>
+        <a href="/api/v1/categories">Categories</a>
+        <a href="/api/v1/tags">Tags</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer__bottom">
+    <p>&copy; <%= currentYear %> BlogByte. Built with Node.js &amp; MongoDB.</p>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

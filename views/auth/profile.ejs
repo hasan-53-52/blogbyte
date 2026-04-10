@@ -1,0 +1,75 @@
+<%- include('../partials/header') %>
+
+<main class="page-profile">
+  <div class="container container--narrow">
+
+    <div class="profile-card">
+      <div class="profile-card__avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
+      <div class="profile-card__info">
+        <h1><%= currentUser.name %></h1>
+        <p class="profile-card__email"><%= currentUser.email %></p>
+        <span class="badge badge--<%= currentUser.role === 'admin' ? 'admin' : 'user' %>">
+          <%= currentUser.role === 'admin' ? '⚡ Admin' : '👤 User' %>
+        </span>
+        <p class="profile-card__bio"><%= currentUser.bio || 'No bio yet.' %></p>
+      </div>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <details class="profile-edit-section">
+      <summary>Edit Profile</summary>
+      <form action="/auth/profile?_method=PUT" method="POST" class="auth-form" style="margin-top: 1rem;">
+        <div class="form-group">
+          <label for="name" class="form-label">Display Name</label>
+          <input type="text" id="name" name="name" class="form-input" value="<%= currentUser.name %>" required />
+        </div>
+        <div class="form-group">
+          <label for="bio" class="form-label">Bio</label>
+          <textarea id="bio" name="bio" class="form-textarea" rows="3" maxlength="300" placeholder="Tell readers a little about yourself…"><%= currentUser.bio || '' %></textarea>
+        </div>
+        <button type="submit" class="btn btn--primary btn--sm">Save Changes</button>
+      </form>
+    </details>
+
+    <!-- My Posts -->
+    <section class="profile-posts">
+      <div class="profile-posts__header">
+        <h2>My Posts</h2>
+        <a href="/posts/new" class="btn btn--primary btn--sm"><i class="fa-solid fa-pen-nib"></i> Write New</a>
+      </div>
+
+      <% if (posts.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-state__icon">✦</div>
+          <p>You haven't written anything yet.</p>
+          <a href="/posts/new" class="btn btn--ghost">Write your first post</a>
+        </div>
+      <% } else { %>
+        <div class="profile-posts__list">
+          <% posts.forEach(post => { %>
+          <div class="profile-post-item">
+            <div class="profile-post-item__info">
+              <a href="/posts/<%= post.slug %>" class="profile-post-item__title"><%= post.title %></a>
+              <div class="profile-post-item__meta">
+                <span class="badge badge--<%= post.status %>"><%= post.status %></span>
+                <span><i class="fa-regular fa-eye"></i> <%= post.views %></span>
+                <span><%= new Date(post.createdAt).toLocaleDateString() %></span>
+              </div>
+            </div>
+            <div class="profile-post-item__actions">
+              <a href="/posts/<%= post.slug %>/edit" class="btn btn--ghost btn--xs"><i class="fa-solid fa-pencil"></i></a>
+              <form action="/posts/<%= post.slug %>?_method=DELETE" method="POST" style="display:inline"
+                    onsubmit="return confirm('Delete this post?')">
+                <button type="submit" class="btn btn--danger btn--xs"><i class="fa-solid fa-trash"></i></button>
+              </form>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
