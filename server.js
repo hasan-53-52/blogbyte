@@ -26,6 +26,9 @@ const apiRoutes = require("./routes/api");
 
 const app = express();
 
+// ── Trust Render's Proxy ──────────────────────────────────────────────────────
+app.set("trust proxy", 1); // Required for secure cookies behind Render's load balancer
+
 // ── Database ──────────────────────────────────────────────────────────────────
 connectDB();
 
@@ -87,7 +90,7 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: "strict",
+      sameSite: "lax", // Changed from "strict" to "lax" for Render proxy compatibility
     },
     name: "blogbyte.sid",
   })
