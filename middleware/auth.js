@@ -1,23 +1,22 @@
 /**
  * middleware/auth.js — Authentication & Authorization Middleware
  */
-
 const User = require("../models/User");
-
 /**
  * requireAuth — Ensure user is logged in via session
  */
 const requireAuth = async (req, res, next) => {
   if (!req.session?.userId) {
+    console.log("DEBUG requireAuth: No userId in session:", JSON.stringify(req.session));
     req.session.returnTo = req.originalUrl;
     if (req.headers.accept?.includes("application/json")) {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
     return res.redirect("/auth/login");
   }
-
   try {
     const user = await User.findById(req.session.userId).select("-password");
+    console.log("DEBUG requireAuth: Found user:", user?._id, "role:", user?.role, "isActive:", user?.isActive);
     if (!user || !user.isActive) {
       req.session.destroy();
       return res.redirect("/auth/login");
@@ -28,18 +27,18 @@ const requireAuth = async (req, res, next) => {
     next(err);
   }
 };
-
 /**
  * requireAdmin — Ensure user has admin role
  */
 const requireAdmin = async (req, res, next) => {
   if (!req.session?.userId) {
+    console.log("DEBUG requireAdmin: No userId in session:", JSON.stringify(req.session));
     req.session.returnTo = req.originalUrl;
     return res.redirect("/auth/login");
   }
-
   try {
     const user = await User.findById(req.session.userId).select("-password");
+    console.log("DEBUG requireAdmin: Found user:", user?._id, "role:", user?.role);
     if (!user || user.role !== "admin") {
       return res.status(403).render("error", {
         title: "403 — Forbidden | BlogByte",
@@ -53,13 +52,11 @@ const requireAdmin = async (req, res, next) => {
     next(err);
   }
 };
-
 /**
  * optionalAuth — Attach user if logged in (no redirect)
  */
 const optionalAuth = async (req, res, next) => {
   if (!req.session?.userId) return next();
-
   try {
     const user = await User.findById(req.session.userId).select("-password");
     if (user && user.isActive) req.user = user;
@@ -68,7 +65,6 @@ const optionalAuth = async (req, res, next) => {
   }
   next();
 };
-
 /**
  * requireOwnerOrAdmin — User must own the resource or be admin
  */
@@ -76,10 +72,8 @@ const requireOwnerOrAdmin = (resourceUserField = "author") => {
   return (req, res, next) => {
     const resource = req.resource; // Set by previous middleware
     if (!resource) return next(new Error("Resource not found"));
-
     const isOwner = resource[resourceUserField]?.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
-
     if (!isOwner && !isAdmin) {
       return res.status(403).render("error", {
         title: "403 — Forbidden | BlogByte",
@@ -90,17 +84,16 @@ const requireOwnerOrAdmin = (resourceUserField = "author") => {
     next();
   };
 };
-
 /**
  * redirectIfAuthenticated — Send logged-in users away from auth pages
  */
 const redirectIfAuthenticated = (req, res, next) => {
   if (req.session?.userId) {
+    console.log("DEBUG redirectIfAuthenticated: User already logged in, redirecting");
     return res.redirect("/");
   }
   next();
 };
-
 module.exports = {
   requireAuth,
   requireAdmin,
