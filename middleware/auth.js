@@ -7,7 +7,6 @@ const User = require("../models/User");
  */
 const requireAuth = async (req, res, next) => {
   if (!req.session?.userId) {
-    console.log("DEBUG requireAuth: No userId in session:", JSON.stringify(req.session));
     req.session.returnTo = req.originalUrl;
     if (req.headers.accept?.includes("application/json")) {
       return res.status(401).json({ success: false, message: "Authentication required" });
@@ -16,7 +15,6 @@ const requireAuth = async (req, res, next) => {
   }
   try {
     const user = await User.findById(req.session.userId).select("-password");
-    console.log("DEBUG requireAuth: Found user:", user?._id, "role:", user?.role, "isActive:", user?.isActive);
     if (!user || !user.isActive) {
       req.session.destroy();
       return res.redirect("/auth/login");
@@ -32,13 +30,11 @@ const requireAuth = async (req, res, next) => {
  */
 const requireAdmin = async (req, res, next) => {
   if (!req.session?.userId) {
-    console.log("DEBUG requireAdmin: No userId in session:", JSON.stringify(req.session));
     req.session.returnTo = req.originalUrl;
     return res.redirect("/auth/login");
   }
   try {
     const user = await User.findById(req.session.userId).select("-password");
-    console.log("DEBUG requireAdmin: Found user:", user?._id, "role:", user?.role);
     if (!user || user.role !== "admin") {
       return res.status(403).render("error", {
         title: "403 — Forbidden | BlogByte",
@@ -89,7 +85,6 @@ const requireOwnerOrAdmin = (resourceUserField = "author") => {
  */
 const redirectIfAuthenticated = (req, res, next) => {
   if (req.session?.userId) {
-    console.log("DEBUG redirectIfAuthenticated: User already logged in, redirecting");
     return res.redirect("/");
   }
   next();
