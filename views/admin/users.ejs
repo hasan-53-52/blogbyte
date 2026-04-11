@@ -2,68 +2,58 @@
 
 <main class="page-admin">
   <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar__header"><span>⚡</span> Admin Panel</div>
-      <nav class="admin-nav">
-        <a href="/admin" class="admin-nav__link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-        <a href="/admin/posts" class="admin-nav__link"><i class="fa-solid fa-newspaper"></i> Posts</a>
-        <a href="/admin/users" class="admin-nav__link admin-nav__link--active"><i class="fa-solid fa-users"></i> Users</a>
-        <a href="/admin/comments" class="admin-nav__link"><i class="fa-solid fa-comments"></i> Comments</a>
-        <div class="admin-nav__divider"></div>
-        <a href="/" class="admin-nav__link"><i class="fa-solid fa-arrow-left"></i> Back to Site</a>
-      </nav>
-    </aside>
+
+    <%- include('../partials/admin-sidebar') %>
 
     <div class="admin-content">
+
+      <div class="admin-mobile-topbar">
+        <button class="admin-menu-btn" id="adminMenuBtn"><i class="fa-solid fa-bars"></i></button>
+        <span class="admin-mobile-title">⚡ Users</span>
+        <span></span>
+      </div>
+
       <div class="admin-topbar">
         <h1>Manage Users</h1>
         <span><%= pagination.total %> total users</span>
       </div>
 
       <div class="admin-panel">
-        <table class="admin-table admin-table--full">
-          <thead>
-            <tr>
-              <th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Last Login</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% users.forEach(user => { %>
-            <tr class="<%= !user.isActive ? 'admin-table__row--muted' : '' %>">
-              <td><strong><%= user.name %></strong></td>
-              <td><%= user.email %></td>
-              <td>
-                <form action="/admin/users/<%= user._id %>/role?_method=PUT" method="POST" style="display:inline">
-                  <select name="role" class="form-select form-select--xs" onchange="this.form.submit()"
-                          <%= user._id.toString() === currentUser._id.toString() ? 'disabled' : '' %>>
-                    <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>user</option>
-                    <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>admin</option>
-                  </select>
-                </form>
-              </td>
-              <td>
-                <span class="badge badge--<%= user.isActive ? 'published' : 'archived' %>">
-                  <%= user.isActive ? 'Active' : 'Inactive' %>
-                </span>
-              </td>
-              <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
-              <td><%= user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never' %></td>
-              <td>
-                <% if (user._id.toString() !== currentUser._id.toString()) { %>
-                <button class="btn btn--ghost btn--xs toggle-status"
-                        data-id="<%= user._id %>"
-                        data-active="<%= user.isActive %>"
-                        title="<%= user.isActive ? 'Deactivate' : 'Activate' %>">
-                  <i class="fa-solid fa-<%= user.isActive ? 'ban' : 'check' %>"></i>
-                </button>
-                <% } else { %>
-                <span class="text-muted" style="font-size:0.8rem">You</span>
-                <% } %>
-              </td>
-            </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="admin-table admin-table--full">
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <% users.forEach(user => { %>
+              <tr class="<%= !user.isActive ? 'admin-table__row--muted' : '' %>">
+                <td><strong><%= user.name %></strong></td>
+                <td class="admin-table__email"><%= user.email %></td>
+                <td>
+                  <form action="/admin/users/<%= user._id %>/role?_method=PUT" method="POST" style="display:inline">
+                    <select name="role" class="form-select form-select--xs" onchange="this.form.submit()"
+                            <%= user._id.toString() === currentUser._id.toString() ? 'disabled' : '' %>>
+                      <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>user</option>
+                      <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>admin</option>
+                    </select>
+                  </form>
+                </td>
+                <td><span class="badge badge--<%= user.isActive ? 'published' : 'archived' %>"><%= user.isActive ? 'Active' : 'Off' %></span></td>
+                <td><%= new Date(user.createdAt).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}) %></td>
+                <td>
+                  <% if (user._id.toString() !== currentUser._id.toString()) { %>
+                  <button class="btn btn--ghost btn--xs toggle-status" data-id="<%= user._id %>" title="<%= user.isActive ? 'Deactivate' : 'Activate' %>">
+                    <i class="fa-solid fa-<%= user.isActive ? 'ban' : 'check' %>"></i>
+                  </button>
+                  <% } else { %>
+                  <span style="font-size:0.75rem;color:var(--text-muted)">You</span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <% if (pagination.totalPages > 1) { %>
@@ -78,14 +68,23 @@
 </main>
 
 <script>
-document.querySelectorAll('.toggle-status').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const id = btn.dataset.id;
-    const res = await fetch(`/admin/users/${id}/status`, { method: 'PATCH' });
-    const data = await res.json();
-    if (data.success) location.reload();
+  const menuBtn = document.getElementById('adminMenuBtn');
+  const sidebar = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('adminOverlay');
+  const closeBtn = document.getElementById('adminSidebarClose');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  document.querySelectorAll('.toggle-status').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const res = await fetch(`/admin/users/${btn.dataset.id}/status`, { method: 'PATCH' });
+      const data = await res.json();
+      if (data.success) location.reload();
+    });
   });
-});
 </script>
 
 <%- include('../partials/footer') %>
