@@ -1,0 +1,26 @@
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="admin-sidebar__header">
+    <div class="admin-sidebar__brand"><span>⚡</span> Admin Panel</div>
+    <button class="admin-sidebar__close" id="adminSidebarClose" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <nav class="admin-nav">
+    <a href="/admin" class="admin-nav__link <%= currentPath === '/admin' ? 'admin-nav__link--active' : '' %>">
+      <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+    </a>
+    <a href="/admin/posts" class="admin-nav__link <%= currentPath.startsWith('/admin/posts') ? 'admin-nav__link--active' : '' %>">
+      <i class="fa-solid fa-newspaper"></i> <span>Posts</span>
+    </a>
+    <a href="/admin/users" class="admin-nav__link <%= currentPath.startsWith('/admin/users') ? 'admin-nav__link--active' : '' %>">
+      <i class="fa-solid fa-users"></i> <span>Users</span>
+    </a>
+    <a href="/admin/comments" class="admin-nav__link <%= currentPath.startsWith('/admin/comments') ? 'admin-nav__link--active' : '' %>">
+      <i class="fa-solid fa-comments"></i> <span>Comments</span>
+    </a>
+    <div class="admin-nav__divider"></div>
+    <a href="/" class="admin-nav__link"><i class="fa-solid fa-arrow-left"></i> <span>Back to Site</span></a>
+    <a href="/posts/new" class="admin-nav__link"><i class="fa-solid fa-pen-nib"></i> <span>New Post</span></a>
+  </nav>
+</aside>
+<div class="admin-overlay" id="adminOverlay"></div>
