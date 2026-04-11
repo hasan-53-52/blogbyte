@@ -3,32 +3,19 @@
 <main class="page-admin">
   <div class="admin-layout">
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar__header">
-        <span>⚡</span> Admin Panel
-      </div>
-      <nav class="admin-nav">
-        <a href="/admin" class="admin-nav__link <%= currentPath === '/admin' ? 'admin-nav__link--active' : '' %>">
-          <i class="fa-solid fa-gauge"></i> Dashboard
-        </a>
-        <a href="/admin/posts" class="admin-nav__link <%= currentPath.startsWith('/admin/posts') ? 'admin-nav__link--active' : '' %>">
-          <i class="fa-solid fa-newspaper"></i> Posts
-        </a>
-        <a href="/admin/users" class="admin-nav__link <%= currentPath.startsWith('/admin/users') ? 'admin-nav__link--active' : '' %>">
-          <i class="fa-solid fa-users"></i> Users
-        </a>
-        <a href="/admin/comments" class="admin-nav__link <%= currentPath.startsWith('/admin/comments') ? 'admin-nav__link--active' : '' %>">
-          <i class="fa-solid fa-comments"></i> Comments
-        </a>
-        <div class="admin-nav__divider"></div>
-        <a href="/" class="admin-nav__link"><i class="fa-solid fa-arrow-left"></i> Back to Site</a>
-        <a href="/posts/new" class="admin-nav__link"><i class="fa-solid fa-pen-nib"></i> New Post</a>
-      </nav>
-    </aside>
+    <%- include('../partials/admin-sidebar') %>
 
-    <!-- Content -->
     <div class="admin-content">
+
+      <!-- Mobile Top Bar -->
+      <div class="admin-mobile-topbar">
+        <button class="admin-menu-btn" id="adminMenuBtn" aria-label="Open menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="admin-mobile-title">⚡ Admin Panel</span>
+        <a href="/posts/new" class="btn btn--primary btn--xs">+ Post</a>
+      </div>
+
       <div class="admin-topbar">
         <h1>Dashboard</h1>
         <span class="admin-topbar__user">Signed in as <strong><%= currentUser.name %></strong></span>
@@ -67,36 +54,40 @@
             <h2>Recent Posts</h2>
             <a href="/admin/posts" class="btn btn--ghost btn--xs">View All</a>
           </div>
-          <table class="admin-table">
-            <thead><tr><th>Title</th><th>Status</th><th>Views</th><th>Date</th></tr></thead>
-            <tbody>
-              <% recentPosts.forEach(post => { %>
-              <tr>
-                <td><a href="/posts/<%= post.slug %>"><%= post.title.substring(0,45) %><%= post.title.length > 45 ? '…' : '' %></a></td>
-                <td><span class="badge badge--<%= post.status %>"><%= post.status %></span></td>
-                <td><%= post.views %></td>
-                <td><%= new Date(post.createdAt).toLocaleDateString() %></td>
-              </tr>
-              <% }) %>
-            </tbody>
-          </table>
+          <div class="table-scroll">
+            <table class="admin-table">
+              <thead><tr><th>Title</th><th>Status</th><th>Views</th><th>Date</th></tr></thead>
+              <tbody>
+                <% recentPosts.forEach(post => { %>
+                <tr>
+                  <td><a href="/posts/<%= post.slug %>" class="admin-table__title"><%= post.title.substring(0,35) %><%= post.title.length > 35 ? '…' : '' %></a></td>
+                  <td><span class="badge badge--<%= post.status %>"><%= post.status %></span></td>
+                  <td><%= post.views %></td>
+                  <td><%= new Date(post.createdAt).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}) %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div class="admin-panel">
-          <div class="admin-panel__header">
-            <h2>Top Posts</h2>
+          <div class="admin-panel__header"><h2>Top Posts</h2></div>
+          <div class="table-scroll">
+            <table class="admin-table">
+              <thead><tr><th>Title</th><th>Views</th></tr></thead>
+              <tbody>
+                <% topPosts.forEach((post, i) => { %>
+                <tr>
+                  <td><span class="admin-rank">#<%= i+1 %></span>
+                    <a href="/posts/<%= post.slug %>" class="admin-table__title"><%= post.title.substring(0,30) %><%= post.title.length > 30 ? '…' : '' %></a>
+                  </td>
+                  <td><%= post.views %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
           </div>
-          <table class="admin-table">
-            <thead><tr><th>Title</th><th>Views</th></tr></thead>
-            <tbody>
-              <% topPosts.forEach((post, i) => { %>
-              <tr>
-                <td><span class="admin-rank">#<%= i+1 %></span> <a href="/posts/<%= post.slug %>"><%= post.title.substring(0,40) %><%= post.title.length > 40 ? '…' : '' %></a></td>
-                <td><%= post.views %></td>
-              </tr>
-              <% }) %>
-            </tbody>
-          </table>
         </div>
       </div>
 
@@ -106,23 +97,37 @@
           <h2>New Users</h2>
           <a href="/admin/users" class="btn btn--ghost btn--xs">View All</a>
         </div>
-        <table class="admin-table">
-          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
-          <tbody>
-            <% recentUsers.forEach(user => { %>
-            <tr>
-              <td><%= user.name %></td>
-              <td><%= user.email %></td>
-              <td><span class="badge badge--<%= user.role %>"><%= user.role %></span></td>
-              <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
-            </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+            <tbody>
+              <% recentUsers.forEach(user => { %>
+              <tr>
+                <td><%= user.name %></td>
+                <td><%= user.email %></td>
+                <td><span class="badge badge--<%= user.role %>"><%= user.role %></span></td>
+                <td><%= new Date(user.createdAt).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}) %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
   </div>
 </main>
+
+<script>
+  const menuBtn = document.getElementById('adminMenuBtn');
+  const sidebar = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('adminOverlay');
+  const closeBtn = document.getElementById('adminSidebarClose');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+</script>
 
 <%- include('../partials/footer') %>
