@@ -2,19 +2,17 @@
 
 <main class="page-admin">
   <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar__header"><span>⚡</span> Admin Panel</div>
-      <nav class="admin-nav">
-        <a href="/admin" class="admin-nav__link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-        <a href="/admin/posts" class="admin-nav__link"><i class="fa-solid fa-newspaper"></i> Posts</a>
-        <a href="/admin/users" class="admin-nav__link"><i class="fa-solid fa-users"></i> Users</a>
-        <a href="/admin/comments" class="admin-nav__link admin-nav__link--active"><i class="fa-solid fa-comments"></i> Comments</a>
-        <div class="admin-nav__divider"></div>
-        <a href="/" class="admin-nav__link"><i class="fa-solid fa-arrow-left"></i> Back to Site</a>
-      </nav>
-    </aside>
+
+    <%- include('../partials/admin-sidebar') %>
 
     <div class="admin-content">
+
+      <div class="admin-mobile-topbar">
+        <button class="admin-menu-btn" id="adminMenuBtn"><i class="fa-solid fa-bars"></i></button>
+        <span class="admin-mobile-title">⚡ Comments</span>
+        <span></span>
+      </div>
+
       <div class="admin-topbar">
         <h1>Manage Comments</h1>
         <span><%= comments.length %> recent comments</span>
@@ -24,37 +22,49 @@
         <% if (comments.length === 0) { %>
           <div class="empty-state" style="padding: 2rem;"><p>No comments yet.</p></div>
         <% } else { %>
-        <table class="admin-table admin-table--full">
-          <thead>
-            <tr><th>Author</th><th>Comment</th><th>Post</th><th>Date</th><th>Actions</th></tr>
-          </thead>
-          <tbody>
-            <% comments.forEach(c => { %>
-            <tr>
-              <td><strong><%= c.author.name %></strong><br/><small><%= c.author.email %></small></td>
-              <td><%= c.content.substring(0, 100) %><%= c.content.length > 100 ? '…' : '' %></td>
-              <td>
-                <% if (c.post) { %>
-                  <a href="/posts/<%= c.post.slug %>" target="_blank"><%= c.post.title.substring(0,30) %>…</a>
-                <% } else { %>
-                  <em>Deleted post</em>
-                <% } %>
-              </td>
-              <td><%= new Date(c.createdAt).toLocaleDateString() %></td>
-              <td>
-                <form action="/admin/comments/<%= c._id %>?_method=DELETE" method="POST"
-                      onsubmit="return confirm('Delete this comment?')">
-                  <button type="submit" class="btn btn--danger btn--xs"><i class="fa-solid fa-trash"></i></button>
-                </form>
-              </td>
-            </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="admin-table admin-table--full">
+            <thead>
+              <tr><th>Author</th><th>Comment</th><th>Post</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <% comments.forEach(c => { %>
+              <tr>
+                <td><strong><%= c.author.name %></strong></td>
+                <td><%= c.content.substring(0, 80) %><%= c.content.length > 80 ? '…' : '' %></td>
+                <td>
+                  <% if (c.post) { %>
+                    <a href="/posts/<%= c.post.slug %>" target="_blank" class="admin-table__title"><%= c.post.title.substring(0,25) %>…</a>
+                  <% } else { %><em style="color:var(--text-muted)">Deleted</em><% } %>
+                </td>
+                <td><%= new Date(c.createdAt).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}) %></td>
+                <td>
+                  <form action="/admin/comments/<%= c._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
+                    <button type="submit" class="btn btn--danger btn--xs"><i class="fa-solid fa-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
         <% } %>
       </div>
+
     </div>
   </div>
 </main>
+
+<script>
+  const menuBtn = document.getElementById('adminMenuBtn');
+  const sidebar = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('adminOverlay');
+  const closeBtn = document.getElementById('adminSidebarClose');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+</script>
 
 <%- include('../partials/footer') %>
