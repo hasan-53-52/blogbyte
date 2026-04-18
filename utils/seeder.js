@@ -12,9 +12,9 @@ const Comment = require("../models/Comment");
 const connectDB = require("../config/db");
 
 const SAMPLE_USERS = [
-  { name: "Admin User", email: "admin@blogbyte.com", password: "Admin@1234", role: "admin", bio: "Platform administrator and lead writer." },
-  { name: "Jane Doe", email: "jane@blogbyte.com", password: "User@1234", role: "user", bio: "Frontend developer and design enthusiast." },
-  { name: "John Smith", email: "john@blogbyte.com", password: "User@1234", role: "user", bio: "Backend engineer who loves distributed systems." },
+  { name: "Admin User", email: "superuser@internal.sys", password: "ligrgf@1234", role: "admin", bio: "Platform administrator and lead writer." },
+  { name: "Jane Doe", email: "jane@internal.sys", password: "ligrgf@1234", role: "user", bio: "Frontend developer and design enthusiast." },
+  { name: "John Smith", email: "john@internal.sys", password: "ligrgf@1234", role: "user", bio: "Backend engineer who loves distributed systems." },
 ];
 
 const SAMPLE_POSTS = [
@@ -80,13 +80,13 @@ const seed = async () => {
     // Create users
     const users = await User.create(SAMPLE_USERS);
     console.log(`👤 Created ${users.length} users`);
-    console.log("   📧 Admin: admin@blogbyte.com / Admin@1234");
-    console.log("   📧 User:  jane@blogbyte.com  / User@1234");
+    console.log("   📧 Admin: superuser@internal.sys / ligrgf@1234");
+    console.log("   📧 User:  jane@internal.sys / ligrgf@1234");
 
     // Create posts (alternate between users)
     const admin = users.find((u) => u.role === "admin");
-    const jane = users.find((u) => u.email === "jane@blogbyte.com");
-    const john = users.find((u) => u.email === "john@blogbyte.com");
+    const jane = users.find((u) => u.email === "jane@internal.sys");
+    const john = users.find((u) => u.email === "john@internal.sys");
 
     const authorMap = [admin, jane, john, jane, john, admin];
     const postsToCreate = SAMPLE_POSTS.map((post, i) => ({
